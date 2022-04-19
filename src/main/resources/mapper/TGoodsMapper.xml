@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxxx.seckill.mapper.TGoodsMapper">
+
+    <select id="findGoodsVo" resultType="com.xxxx.seckill.vo.GoodsVo">
+        SELECT
+            t_goods.id,
+            t_goods.goods_title,
+            t_goods.goods_img,
+            t_goods.goods_detail,
+            t_goods.goods_name,
+            t_goods.goods_price,
+            t_goods.goods_stock,
+            t_seckill_goods.seckill_price,
+            t_seckill_goods.stock_count,
+            t_seckill_goods.start_date,
+            t_seckill_goods.end_date
+        FROM
+            `t_goods`
+                left join
+            `t_seckill_goods`
+            on
+                t_goods.id = t_seckill_goods.id;
+    </select>
+    <select id="findGoodsVoByGoodsId" resultType="com.xxxx.seckill.vo.GoodsVo">
+        SELECT
+            t_goods.id,
+            t_goods.goods_title,
+            t_goods.goods_img,
+            t_goods.goods_detail,
+            t_goods.goods_name,
+            t_goods.goods_price,
+            t_goods.goods_stock,
+            t_seckill_goods.seckill_price,
+            t_seckill_goods.stock_count,
+            t_seckill_goods.start_date,
+            t_seckill_goods.end_date
+        FROM
+            `t_goods`
+                left join
+            `t_seckill_goods`
+            on
+                t_goods.id = t_seckill_goods.id
+        where
+            t_goods.id =#{goodsId};
+    </select>
+</mapper>
