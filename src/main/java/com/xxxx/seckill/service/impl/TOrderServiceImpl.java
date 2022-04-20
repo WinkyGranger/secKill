@@ -1,18 +1,20 @@
 package com.xxxx.seckill.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.xxxx.seckill.mapper.TSeckillGoodsMapper;
+import com.xxxx.seckill.exception.GlobalException;
 import com.xxxx.seckill.mapper.TSeckillOrderMapper;
 import com.xxxx.seckill.pojo.TOrder;
 import com.xxxx.seckill.mapper.TOrderMapper;
 import com.xxxx.seckill.pojo.TSeckillGoods;
 import com.xxxx.seckill.pojo.TSeckillOrder;
 import com.xxxx.seckill.pojo.TUser;
+import com.xxxx.seckill.service.TGoodsService;
 import com.xxxx.seckill.service.TOrderService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xxxx.seckill.service.TSeckillGoodsService;
-import com.xxxx.seckill.service.TSeckillOrderService;
 import com.xxxx.seckill.vo.GoodsVo;
+import com.xxxx.seckill.vo.OrderDetailVo;
+import com.xxxx.seckill.vo.RespBeanEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +37,8 @@ public class TOrderServiceImpl extends ServiceImpl<TOrderMapper, TOrder> impleme
     private TOrderMapper tOrderMapper;
     @Autowired
     private TSeckillOrderMapper tSeckillOrderMapper;
+    @Autowired
+    private TGoodsService tGoodsService;
 
 
 
@@ -70,5 +74,20 @@ public class TOrderServiceImpl extends ServiceImpl<TOrderMapper, TOrder> impleme
 //        tSeckillOrderService.save(tSeckillOrder);
 
         return tOrder;
+    }
+
+    @Override
+    public OrderDetailVo detail(Long orderId) {
+        if(null == orderId){
+            throw new GlobalException(RespBeanEnum.ORDER_NOT_EXIST);
+        }
+        TOrder tOrder = baseMapper.selectById(orderId);
+        GoodsVo goodsVoByGoodsId = tGoodsService.findGoodsVoByGoodsId(tOrder.getGoodsId());
+        OrderDetailVo deatilVo = new OrderDetailVo();
+        deatilVo.setTOrder(tOrder);
+        deatilVo.setGoodsVo(goodsVoByGoodsId);
+        return deatilVo;
+
+
     }
 }

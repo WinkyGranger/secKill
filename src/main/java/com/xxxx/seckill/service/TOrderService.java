@@ -4,6 +4,7 @@ import com.xxxx.seckill.pojo.TOrder;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xxxx.seckill.pojo.TUser;
 import com.xxxx.seckill.vo.GoodsVo;
+import com.xxxx.seckill.vo.OrderDetailVo;
 
 /**
  * <p>
@@ -16,4 +17,6 @@ import com.xxxx.seckill.vo.GoodsVo;
 public interface TOrderService extends IService<TOrder> {
 
     TOrder secKill(TUser user, GoodsVo goods);
+
+    OrderDetailVo detail(Long orderId);
 }
