@@ -37,6 +37,31 @@ spring:
         max-idle: 200
         min-idle: 5
 
+  rabbitmq:
+    host: 192.168.138.128
+    username: guest
+    password: guest
+    virtual-host: /
+    port: 5672
+    listener:
+      simple:
+        concurrency: 10
+        max-concurrency: 10
+#        限制消费者一次处理几条消息
+        prefetch: 1
+#        消息被拒绝时是否重新进入队列
+        default-requeue-rejected: true
+    template:
+      retry:
+#        发布重试
+        enabled: true
+        initial-interval: 1000ms
+        max-attempts: 3
+        max-interval: 10000ms
+#        重试的间隔乘数
+        multiplier: 1
+
+
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.xxxx.seckill.pojo

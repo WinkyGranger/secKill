@@ -1,6 +1,7 @@
 package com.xxxx.seckill.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.xxxx.seckill.exception.GlobalException;
 import com.xxxx.seckill.mapper.TSeckillOrderMapper;
 import com.xxxx.seckill.pojo.TOrder;
@@ -16,7 +17,10 @@ import com.xxxx.seckill.vo.GoodsVo;
 import com.xxxx.seckill.vo.OrderDetailVo;
 import com.xxxx.seckill.vo.RespBeanEnum;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 
@@ -39,18 +43,30 @@ public class TOrderServiceImpl extends ServiceImpl<TOrderMapper, TOrder> impleme
     private TSeckillOrderMapper tSeckillOrderMapper;
     @Autowired
     private TGoodsService tGoodsService;
+    @Autowired
+    private RedisTemplate redisTemplate;
 
 
 
 
     @Override
+    @Transactional
     public TOrder secKill(TUser user, GoodsVo goods) {
-        QueryWrapper<TSeckillGoods> tSeckillGoodsQW = new QueryWrapper<>();
-        //库存表-1
-        tSeckillGoodsQW.eq("goods_id",goods.getId());
-        TSeckillGoods one = tSeckillGoodsService.getOne(tSeckillGoodsQW);
-        one.setStockCount(one.getStockCount() - 1);
-        tSeckillGoodsService.updateById(one);
+
+        ValueOperations valueOperations = redisTemplate.opsForValue();
+        TSeckillGoods seckillGoods = tSeckillGoodsService.getOne(new QueryWrapper<TSeckillGoods>().eq("goods_id", goods.getId()));
+        seckillGoods.setStockCount(seckillGoods.getStockCount() - 1);
+
+        tSeckillGoodsService.update(new UpdateWrapper<TSeckillGoods>()
+                .setSql("stock_count = " + "stock_count-1")
+                .eq("goods_id", goods.getId())
+                .gt("stock_count", 0)
+        );
+        if (seckillGoods.getStockCount() < 1) {
+            //判断是否还有库存
+            valueOperations.set("isStockEmpty:" + goods.getId(), "0");
+            return null;
+        }
 
         //加一条流水号 生成订单
         TOrder tOrder = new TOrder();
@@ -64,14 +80,15 @@ public class TOrderServiceImpl extends ServiceImpl<TOrderMapper, TOrder> impleme
         tOrder.setStatus(0);
         tOrder.setCreateDate(new Date());
         tOrderMapper.insert(tOrder);
-//        tOrderService.save(tOrder);
+
         //生成秒杀订单
         TSeckillOrder tSeckillOrder = new TSeckillOrder();
         tSeckillOrder.setUserId(user.getId());
         tSeckillOrder.setGoodsId(goods.getId());
         tSeckillOrder.setOrderId(tOrder.getId());
         tSeckillOrderMapper.insert(tSeckillOrder);
-//        tSeckillOrderService.save(tSeckillOrder);
+
+        redisTemplate.opsForValue().set("order" + user.getId() +":" + goods.getId(),tSeckillOrder);
 
         return tOrder;
     }
