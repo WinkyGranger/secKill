@@ -2,6 +2,7 @@ package com.xxxx.seckill.service;
 
 import com.xxxx.seckill.pojo.TSeckillOrder;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xxxx.seckill.pojo.TUser;
 
 /**
  * <p>
@@ -14,4 +15,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface TSeckillOrderService extends IService<TSeckillOrder> {
 
     boolean getOne(Long id, Long goodsId);
+
+    Long getResult(TUser user, Long goodsId);
 }

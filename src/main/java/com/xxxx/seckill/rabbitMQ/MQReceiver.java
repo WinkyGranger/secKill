@@ -44,8 +44,6 @@ public class MQReceiver {
         }
         //下单
         orderService.secKill(user,goodsVoByGoodsId);
-
-
     }
 
 

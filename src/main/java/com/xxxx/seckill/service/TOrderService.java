@@ -19,4 +19,10 @@ public interface TOrderService extends IService<TOrder> {
     TOrder secKill(TUser user, GoodsVo goods);
 
     OrderDetailVo detail(Long orderId);
+
+    String createPath(TUser user, Long goodsId);
+
+    Boolean checkPath(TUser user, Long goodsId,String path);
+
+    boolean checkCaptcha(TUser user, Long goodsId, String captcha);
 }
